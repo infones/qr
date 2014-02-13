@@ -7,7 +7,7 @@
 
     include "qrlib.php";    
     
-    $errorCorrectionLevel = 1;
+    $errorCorrectionLevel = 3;
     if (isset($_REQUEST['level']) && in_array($_REQUEST['level'], array('L','M','Q','H')))
         $errorCorrectionLevel = $_REQUEST['level'];    
 
