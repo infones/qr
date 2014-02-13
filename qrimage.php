@@ -74,14 +74,19 @@
             $base_image =ImageCreate($imgW, $imgH);
             
             $col[0] = ImageColorAllocate($base_image,255,255,255);
-            $col[1] = ImageColorAllocate($base_image,0,0,0);
+            $col[1] = ImageColorAllocate($base_image,0,58,195);
+            $col[2] = ImageColorAllocate($base_image,195,0,0);
 
             imagefill($base_image, 0, 0, $col[0]);
-
             for($y=0; $y<$h; $y++) {
                 for($x=0; $x<$w; $x++) {
                     if ($frame[$y][$x] == '1') {
-                        ImageSetPixel($base_image,$x+$outerFrame,$y+$outerFrame,$col[1]); 
+                        if ($x + $y < $w) {
+                            ImageSetPixel($base_image,$x+$outerFrame,$y+$outerFrame,$col[1]); 
+                        } else {
+                            ImageSetPixel($base_image,$x+$outerFrame,$y+$outerFrame,$col[2]); 
+                        }
+                        
                     }
                 }
             }
