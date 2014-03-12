@@ -12,6 +12,7 @@ http://qr.edocu.sk/?data=http://example.com
 * level - error correction level ("L"ow,"M"edium,"Q"uarter,"H"igh) (*default: H*)
 * size  - pixels per point (*default: 5*)
 * border - border size in points (*default: 2*)
+* fileName - PNG file name (*default: qrcode.png*) 
 
 
 

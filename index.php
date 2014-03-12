@@ -1,12 +1,18 @@
 <?php    
-
 // parameters:
 //    data  - content 
 //    level - error correction level ("L"ow,"M"edium,"Q"uarter,"H"igh)  
 //    size  - pixels per point
 //    border - in points
-
+//    fileName - default name of the file
+    
     include "qrlib.php";    
+
+    $fileName="qrcode.png";
+    if (isset($_REQUEST["fileName"]))
+      $fileName=$_REQUEST["fileName"];
+
+    header ("Content-Disposition: inline; filename=".$fileName);
     
     $borderSize= 2;
     if (isset($_REQUEST['border']))
@@ -29,9 +35,10 @@
         // user data
         QRcode::png($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize);    
         
-    } else {    
+    } 
+    else 
+    {    
         die('Data cannot be empty!');
-        
     }    
     
 ?>   
