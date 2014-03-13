@@ -48,5 +48,5 @@ http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes.php&rowCount=4&cellCount
 * logoFile - logo file (*designfile=""*)
 * outputName - name of output file (*default=qrgrid.pdf*)
 * preset - page layout preset (*"60_1x1", "A4_4x3" or "ch_8x5"*) 
-
+* showSerial - show cell serial number (*default=0*)
 

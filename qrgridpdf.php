@@ -30,6 +30,7 @@
     logoFile - logo file (designfile="")
     outputName - name of output file (default=qrgrid.pdf)
     preset - page layout preset ("60_1x1", "A4_4x3" or "ch_8x5") 
+    showSerial - show cell serial number (default=0)
 
 */
 
@@ -97,6 +98,7 @@ $drawCircle=0;
 $rowCount=3;
 $cellCount=4;
 $preset=0;
+$showSerial=0;
 
 if (isset($_REQUEST["preset"]))
    $preset=$_REQUEST["preset"];
@@ -159,6 +161,7 @@ switch ($preset)
       $drawCircle=1; 
       $cellCount=8;
       $rowCount=5;
+      $showSerial=1;
       break;
    default:
       break;
@@ -221,6 +224,9 @@ if (isset($_REQUEST["logoFile"]))
 if (isset($_REQUEST["outputName"]))
    $OUTPUT_NAME=$_REQUEST["outputName"];
 
+if (isset($_REQUEST["showSerial"]))
+   $showSerial=$_REQUEST["showSerial"];
+
 
 $LOGO_BORDER_TOP=($GRID_HEIGHT-$DIAMETER)/2;          // distance between cutoff circle and grid square
 $LOGO_BORDER_LEFT=($GRID_WIDTH-$DIAMETER)/2;          // distance between cutoff circle and grid square
@@ -232,6 +238,7 @@ $data = str_getcsv(file_get_contents($dataSource),"\n");
 $qrCount=count($data);
 
 $pdf = new MPDF($PAGE_ORIENT, $PAGE_UNITS, array($PAGE_WIDTH,$PAGE_HEIGHT));
+$pdf->SetFont('Arial','B',16);
 
 $cntr=0;
 
@@ -258,6 +265,11 @@ while ($cntr < $qrCount)      // one cycle = one page
          while ($cntr < $qrCount and !($href=urlencode($data[$cntr++]))) {}; // skip empty lines
          if ($href)     // we have valid href that means not EOF 
          {
+            if ($showSerial) 
+            {
+               $pdf->SetXY($GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT);                                                                                                                                                                                                         
+               $pdf->Cell($GRID_WIDTH,10,$cntr);
+            }
             if ($LOGO_FILE <> "")
                $pdf->useTemplate($tplIdx, $GRID_OFFSET_HORIZONTAL+$LOGO_BORDER_LEFT+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+$LOGO_BORDER_TOP); 
             $pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0',$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
