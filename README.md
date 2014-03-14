@@ -13,6 +13,7 @@ http://qr.edocu.sk/?data=http://example.com
 * size  - pixels per point (*default: 5*)
 * border - border size in points (*default: 2*)
 * fileName - PNG file name (*default: qrcode.png*) 
+* blackWhite - use black&white colors
 
 
 
@@ -22,12 +23,12 @@ QR Code grid to PDF
 Usage
 -----
 
-http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes.php&preset=A4_4x3
-http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes.php&rowCount=4&cellCount=6&pageUnits=mm&pageWidth=320&pageHeight=280&qrSize=38
+http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes_json.php&preset=A4_4x3
+http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes_json.php&rowCount=4&cellCount=6&pageUnits=mm&pageWidth=320&pageHeight=280&qrSize=38
 
 ### Parameters:
 
-* **source - reference to text list of QR codes content**
+* **source - reference to JSON list of QR codes content**
 * circle - draw cutoff circle (*default: 1*)
 * rowCount - number of rows/bands (*default=3*)
 * cellCount - number of cella per band (*default=4*)
@@ -49,4 +50,5 @@ http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes.php&rowCount=4&cellCount
 * outputName - name of output file (*default=qrgrid.pdf*)
 * preset - page layout preset (*"60_1x1", "A4_4x3" or "ch_8x5"*) 
 * showSerial - show cell serial number (*default=0*)
+* blackWhite - print QR code in black&white mode (*default=0)
 

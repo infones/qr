@@ -5,12 +5,17 @@
 //    size  - pixels per point
 //    border - in points
 //    fileName - default name of the file
+//    blackWhite - use black&white colors
     
     include "qrlib.php";    
 
     $fileName="qrcode.png";
     if (isset($_REQUEST["fileName"]))
       $fileName=$_REQUEST["fileName"];
+
+    $blackWhite=false;
+    if (isset($_REQUEST["blackWhite"]))
+      $blackWhite=$_REQUEST["blackWhite"];
 
     header ("Content-Disposition: inline; filename=".$fileName);
     
@@ -33,7 +38,7 @@
             die('Data cannot be empty!');
             
         // user data
-        QRcode::png($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize);    
+        QRcode::png($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize, false, $blackWhite);    
         
     } 
     else 
@@ -41,4 +46,5 @@
         die('Data cannot be empty!');
     }    
     
-?>   
+?> 
+

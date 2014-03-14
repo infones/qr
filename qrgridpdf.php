@@ -9,7 +9,7 @@
    urlencode() is called for each line
 
    parameters:
-    source - reference to text file containing list of data 
+    source - reference to JSON file containing list of data 
     circle - draw circle around QR code (default=0)
     rowCount - number of rows/bands (default=3)
     cellCount - number of cella per band (default=4)
@@ -31,6 +31,7 @@
     outputName - name of output file (default=qrgrid.pdf)
     preset - page layout preset ("60_1x1", "A4_4x3" or "ch_8x5") 
     showSerial - show cell serial number (default=0)
+    blackWhite - print QR code in black&white mode (default=0)
 
 */
 
@@ -99,6 +100,7 @@ $rowCount=3;
 $cellCount=4;
 $preset=0;
 $showSerial=0;
+$blackWhite=0;
 
 if (isset($_REQUEST["preset"]))
    $preset=$_REQUEST["preset"];
@@ -167,6 +169,9 @@ switch ($preset)
       break;
 }
 
+if (isset($_REQUEST["blackWhite"]))
+   $blackWhite=$_REQUEST["blackWhite"];
+
 if (isset($_REQUEST["circle"]))
    $drawCircle=$_REQUEST["circle"];
 
@@ -234,8 +239,9 @@ $LOGO_BORDER_LEFT=($GRID_WIDTH-$DIAMETER)/2;          // distance between cutoff
 
 isset($_REQUEST["source"]) or die("source parameter missing");
 $dataSource=$_REQUEST["source"];
-$data = str_getcsv(file_get_contents($dataSource),"\n");
+$data = json_decode(file_get_contents($dataSource));
 $qrCount=count($data);
+
 
 $pdf = new MPDF($PAGE_ORIENT, $PAGE_UNITS, array($PAGE_WIDTH,$PAGE_HEIGHT));
 $pdf->SetFont('Arial','B',16);
@@ -272,7 +278,8 @@ while ($cntr < $qrCount)      // one cycle = one page
             }
             if ($LOGO_FILE <> "")
                $pdf->useTemplate($tplIdx, $GRID_OFFSET_HORIZONTAL+$LOGO_BORDER_LEFT+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+$LOGO_BORDER_TOP); 
-            $pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0',$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
+            $pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
+            //$pdf->Image('http://localhost/qr/index.php?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
             if ($drawCircle) 
                $pdf->Circle($GRID_OFFSET_HORIZONTAL+($i+0.5)*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+0.5*$GRID_HEIGHT,$DIAMETER/2);
          }
