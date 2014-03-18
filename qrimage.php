@@ -27,7 +27,7 @@
     class QRimage {
     
         //----------------------------------------------------------------------
-        public static function png($frame, $filename = false, $pixelPerPoint = 4, $outerFrame = 4,$saveandprint=FALSE, $blackWhite=false) 
+        public static function png($frame, $filename = false, $pixelPerPoint = 4, $outerFrame = 4,$saveandprint=FALSE, $blackWhite=0) 
         {
             $image = self::image($frame, $pixelPerPoint, $outerFrame, $blackWhite);
             
@@ -48,7 +48,7 @@
         }
     
         //----------------------------------------------------------------------
-        public static function jpg($frame, $filename = false, $pixelPerPoint = 8, $outerFrame = 4, $q = 85, $blackWhite=false) 
+        public static function jpg($frame, $filename = false, $pixelPerPoint = 8, $outerFrame = 4, $q = 85, $blackWhite=0) 
         {
             $image = self::image($frame, $pixelPerPoint, $outerFrame, $blackWhite);
             
@@ -63,7 +63,7 @@
         }
     
         //----------------------------------------------------------------------
-        private static function image($frame, $pixelPerPoint = 4, $outerFrame = 4, $blackWhite=false) 
+        private static function image($frame, $pixelPerPoint = 4, $outerFrame = 4, $blackWhite=0) 
         {
             $h = count($frame);
             $w = strlen($frame[0]);
@@ -74,9 +74,14 @@
             $base_image =ImageCreate($imgW, $imgH);
 
             $col[0] = ImageColorAllocate($base_image,255,255,255);
-            if ($blackWhite)
+            if ($blackWhite==1)
             {
                $col[1] = ImageColorAllocate($base_image,64,64,64);
+               $col[2] = ImageColorAllocate($base_image,0,0,0);
+            }
+            elseif ($blackWhite==2)
+            {
+               $col[1] = ImageColorAllocate($base_image,0,0,0);
                $col[2] = ImageColorAllocate($base_image,0,0,0);
             }
             else

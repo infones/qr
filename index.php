@@ -5,7 +5,7 @@
 //    size  - pixels per point
 //    border - in points
 //    fileName - default name of the file
-//    blackWhite - use black&white colors
+//    blackWhite - color set (0=color, 1=gray, 2=B&W)
     
     include "qrlib.php";    
 
@@ -13,7 +13,7 @@
     if (isset($_REQUEST["fileName"]))
       $fileName=$_REQUEST["fileName"];
 
-    $blackWhite=false;
+    $blackWhite=0;
     if (isset($_REQUEST["blackWhite"]))
       $blackWhite=$_REQUEST["blackWhite"];
 

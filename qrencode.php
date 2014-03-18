@@ -280,7 +280,7 @@
         }
         
         //----------------------------------------------------------------------
-        public static function png($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4, $saveandprint=false, $blackWhite=false) 
+        public static function png($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4, $saveandprint=false, $blackWhite=0) 
         {
             $enc = QRencode::factory($level, $size, $margin);
             return $enc->encodePNG($text, $outfile, $saveandprint=false, $blackWhite);
@@ -477,7 +477,7 @@
         }
         
         //----------------------------------------------------------------------
-        public function encodePNG($intext, $outfile = false,$saveandprint=false, $blackWhite=false) 
+        public function encodePNG($intext, $outfile = false,$saveandprint=false, $blackWhite=0) 
         {
             try {
             

@@ -31,7 +31,8 @@
     outputName - name of output file (default=qrgrid.pdf)
     preset - page layout preset ("60_1x1", "A4_4x3" or "ch_8x5") 
     showSerial - show cell serial number (default=0)
-    blackWhite - print QR code in black&white mode (default=0)
+    blackWhite - QR color mode 0=color 1=gray 2=B&W (default=0)
+    showList - print list of QR codes at the end of document (default=0)
 
 */
 
@@ -100,6 +101,7 @@ $rowCount=3;
 $cellCount=4;
 $preset=0;
 $showSerial=0;
+$showList=0;
 $blackWhite=0;
 
 if (isset($_REQUEST["preset"]))
@@ -164,6 +166,7 @@ switch ($preset)
       $cellCount=8;
       $rowCount=5;
       $showSerial=1;
+      $showList=1;
       break;
    default:
       break;
@@ -232,6 +235,9 @@ if (isset($_REQUEST["outputName"]))
 if (isset($_REQUEST["showSerial"]))
    $showSerial=$_REQUEST["showSerial"];
 
+if (isset($_REQUEST["showList"]))
+   $showList=$_REQUEST["showList"];
+
 
 $LOGO_BORDER_TOP=($GRID_HEIGHT-$DIAMETER)/2;          // distance between cutoff circle and grid square
 $LOGO_BORDER_LEFT=($GRID_WIDTH-$DIAMETER)/2;          // distance between cutoff circle and grid square
@@ -278,13 +284,41 @@ while ($cntr < $qrCount)      // one cycle = one page
             }
             if ($LOGO_FILE <> "")
                $pdf->useTemplate($tplIdx, $GRID_OFFSET_HORIZONTAL+$LOGO_BORDER_LEFT+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+$LOGO_BORDER_TOP); 
-            $pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
-            //$pdf->Image('http://localhost/qr/index.php?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
+            //$pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
+            $pdf->Image('http://localhost/qr/index.php?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
             if ($drawCircle) 
                $pdf->Circle($GRID_OFFSET_HORIZONTAL+($i+0.5)*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+0.5*$GRID_HEIGHT,$DIAMETER/2);
          }
       }
    }
+}
+
+
+// print list of QR codes at the end of document
+if ($showList)
+{
+   $pdf->SetFont('Arial','',10);
+
+   $rowSize=6;
+   $cntr=0;
+   $rowsPerPage=($PAGE_HEIGHT-40)/$rowSize;
+
+   while ($cntr < $qrCount)      // one cycle = one page
+   {
+      $pdf->AddPage(); 
+      for ($r=0; $r<$rowsPerPage && $cntr < $qrCount; $r++)
+      {
+         while ($cntr < $qrCount and !($href=$data[$cntr++])) {}; // skip empty lines
+         if ($href)     // we have valid href that means not EOF 
+         {
+            $pdf->SetXY(20,20+$rowSize*$r);
+            $pdf->Cell(0,0,$cntr);
+            $pdf->SetXY(50,20+$rowSize*$r);
+            $pdf->Cell(0,0,$href);
+         }
+      }
+   }
+
 }
 
 $pdf->Output($OUTPUT_NAME, 'D');
