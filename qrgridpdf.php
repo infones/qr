@@ -33,6 +33,7 @@
     showSerial - show cell serial number (default=0)
     blackWhite - QR color mode 0=color 1=gray 2=B&W (default=0)
     showList - print list of QR codes at the end of document (default=0)
+    showName - print element name (default=0)
 
 */
 
@@ -95,6 +96,8 @@ $QR_SIZE=56;                                    // size of QR
 $BACKGROUND_FILE="";                            // background grid
 $LOGO_FILE="";                                  // Logo design
 $OUTPUT_NAME="qrgrid.pdf";                      // output file default name
+$NAME_OFFSET_VERTICAL=1;
+$NAME_OFFSET_HORIZONTAL=1;
 
 $drawCircle=0; 
 $rowCount=3;
@@ -103,13 +106,37 @@ $preset=0;
 $showSerial=0;
 $showList=0;
 $blackWhite=0;
+$showName=0;
 
 if (isset($_REQUEST["preset"]))
    $preset=$_REQUEST["preset"];
 
 switch ($preset) 
 {
-   case "60_1x1":
+   case "24_1x1":
+      $PAGE_ORIENT="P";
+      $PAGE_WIDTH=24;
+      $PAGE_HEIGHT=30;
+      $BAND_HEIGHT=20;
+      $GRID_HEIGHT=20; 
+      $GRID_WIDTH=20; 
+      $GRID_OFFSET_VERTICAL=2;
+      $GRID_OFFSET_HORIZONTAL=2;
+      $QR_OFFSET_VERTICAL=0;
+      //$QR_OFFSET_VERTICAL=6;
+      $QR_OFFSET_HORIZONTAL=0; 
+      $QR_SIZE=20;
+      $BACKGROUND_FILE="";
+      $LOGO_FILE="";
+      $OUTPUT_NAME="qr_1x1.pdf";
+      $rowCount=1;
+      $cellCount=1;
+      $showName=1;
+      $showList=0;
+      $showSerial=0;
+      $blackWhite=2;
+      break;
+    case "60_1x1":
       $PAGE_WIDTH=60;
       $PAGE_HEIGHT=60;
       $BAND_HEIGHT=60;
@@ -238,6 +265,9 @@ if (isset($_REQUEST["showSerial"]))
 if (isset($_REQUEST["showList"]))
    $showList=$_REQUEST["showList"];
 
+if (isset($_REQUEST["showName"]))
+   $showName=$_REQUEST["showName"];
+
 
 $LOGO_BORDER_TOP=($GRID_HEIGHT-$DIAMETER)/2;          // distance between cutoff circle and grid square
 $LOGO_BORDER_LEFT=($GRID_WIDTH-$DIAMETER)/2;          // distance between cutoff circle and grid square
@@ -250,7 +280,9 @@ $qrCount=count($data);
 
 
 $pdf = new MPDF($PAGE_ORIENT, $PAGE_UNITS, array($PAGE_WIDTH,$PAGE_HEIGHT));
-$pdf->SetFont('Arial','B',16);
+$pdf->AddFont('arial','','arial.php');
+$pdf->SetFont('arial','',16);
+$pdf->SetAutoPageBreak(false);
 
 $cntr=0;
 
@@ -274,21 +306,30 @@ while ($cntr < $qrCount)      // one cycle = one page
    {
       for ($i=0; $i < $cellCount && $cntr < $qrCount; $i++)    // grid cells 
       {
-         while ($cntr < $qrCount and !($href=urlencode($data[$cntr++]))) {}; // skip empty lines
-         if ($href)     // we have valid href that means not EOF 
+         $href=urlencode($data[$cntr]->href);
+         if ($showSerial) 
          {
-            if ($showSerial) 
-            {
-               $pdf->SetXY($GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT);                                                                                                                                                                                                         
-               $pdf->Cell($GRID_WIDTH,10,$cntr);
-            }
-            if ($LOGO_FILE <> "")
-               $pdf->useTemplate($tplIdx, $GRID_OFFSET_HORIZONTAL+$LOGO_BORDER_LEFT+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+$LOGO_BORDER_TOP); 
-            //$pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
-            $pdf->Image('http://localhost/qr/index.php?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
-            if ($drawCircle) 
-               $pdf->Circle($GRID_OFFSET_HORIZONTAL+($i+0.5)*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+0.5*$GRID_HEIGHT,$DIAMETER/2);
+            $pdf->SetFont('arial','B',16);
+            $pdf->SetXY($GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT);                                                                                                                                                                                                         
+            $pdf->Cell($GRID_WIDTH,10,$cntr+1);
          }
+         if ($showName) 
+         {
+            $name=substr(iconv('UTF-8', 'ISO-8859-2',$data[$cntr]->name),0,15);
+            $pdf->SetFont('arial','',8);
+            $pdf->SetY($GRID_OFFSET_VERTICAL+($r+1)*$BAND_HEIGHT);
+            $pdf->SetX($GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH);
+            $pdf->Cell($GRID_WIDTH,5,$name,0,0,'C', false);
+         }
+         if ($LOGO_FILE <> "")
+            $pdf->useTemplate($tplIdx, $GRID_OFFSET_HORIZONTAL+$LOGO_BORDER_LEFT+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+$LOGO_BORDER_TOP); 
+         $pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
+         //$pdf->Image('http://localhost/qr/index.php?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
+         if ($drawCircle) 
+         {
+            $pdf->Circle($GRID_OFFSET_HORIZONTAL+($i+0.5)*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+0.5*$GRID_HEIGHT,$DIAMETER/2);
+         }
+         $cntr++;
       }
    }
 }
@@ -297,7 +338,7 @@ while ($cntr < $qrCount)      // one cycle = one page
 // print list of QR codes at the end of document
 if ($showList)
 {
-   $pdf->SetFont('Arial','',10);
+   $pdf->SetFont('arial','',10);
 
    $rowSize=6;
    $cntr=0;
@@ -308,14 +349,12 @@ if ($showList)
       $pdf->AddPage(); 
       for ($r=0; $r<$rowsPerPage && $cntr < $qrCount; $r++)
       {
-         while ($cntr < $qrCount and !($href=$data[$cntr++])) {}; // skip empty lines
-         if ($href)     // we have valid href that means not EOF 
-         {
-            $pdf->SetXY(20,20+$rowSize*$r);
-            $pdf->Cell(0,0,$cntr);
-            $pdf->SetXY(50,20+$rowSize*$r);
-            $pdf->Cell(0,0,$href);
-         }
+         $href=$data[$cntr]->href;
+         $pdf->SetXY(20,20+$rowSize*$r);
+         $pdf->Cell(0,0,$cntr+1);
+         $pdf->SetXY(50,20+$rowSize*$r);
+         $pdf->Cell(0,0,$href);
+         $cntr++;
       }
    }
 
