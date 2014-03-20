@@ -51,4 +51,5 @@ http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes_json.php&rowCount=4&cell
 * preset - page layout preset (*"60_1x1", "A4_4x3" or "ch_8x5"*) 
 * showSerial - show cell serial number (*default=0*)
 * blackWhite - QR code color schema 0=color 1=gray 2=B&W (*default=0)
+* showName - show element name (*default=0*)
 
