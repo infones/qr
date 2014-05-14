@@ -14,6 +14,7 @@ http://qr.edocu.sk/?data=http://example.com
 * border - border size in points (*default: 2*)
 * fileName - PNG file name (*default: qrcode.png*) 
 * blackWhite - color schema 0=color 1=gray 2=B&W (*default=0*) 
+* format - output format PNG, EPS, TEXT, RAW (*default=PNG)
 
 
 

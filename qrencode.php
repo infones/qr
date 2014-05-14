@@ -279,6 +279,14 @@
             return $this->encodeInput($input);
         }
         
+
+        //----------------------------------------------------------------------
+        public static function eps($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4, $blackWhite=0) 
+        {
+            $enc = QRencode::factory($level, $size, $margin, $blackWhite);
+            return $enc->encodeEPS($text, $outfile, $blackWhite);
+        }
+
         //----------------------------------------------------------------------
         public static function png($text, $outfile = false, $level = QR_ECLEVEL_L, $size = 3, $margin = 4, $saveandprint=false, $blackWhite=0) 
         {
@@ -476,6 +484,29 @@
             }
         }
         
+        
+        //----------------------------------------------------------------------
+        public function encodeEPS($intext, $outfile = false, $blackWhite=0) 
+        {
+            try {
+            
+                ob_start();
+                $tab = $this->encode($intext);
+                $err = ob_get_contents();
+                ob_end_clean();
+               
+                if ($err != '')
+                    QRtools::log($outfile, $err);
+                
+                QRimage::eps($tab, $outfile, max(1, $this->size), $this->margin, $blackWhite);
+            
+            } catch (Exception $e) {
+            
+                QRtools::log($outfile, $e->getMessage());
+            
+            }
+        }
+
         //----------------------------------------------------------------------
         public function encodePNG($intext, $outfile = false,$saveandprint=false, $blackWhite=0) 
         {

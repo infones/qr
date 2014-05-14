@@ -27,6 +27,99 @@
     class QRimage {
     
         //----------------------------------------------------------------------
+        public static function eps($frame, $filename = false, $pixelPerPoint = 4, $outerFrame = 4, $blackWhite=0) 
+        {
+            $h = count($frame);
+            $w = strlen($frame[0]);
+
+            $imgW = $w + 2*$outerFrame;
+            $imgH = $h + 2*$outerFrame;
+            $scaledW = $imgW * $pixelPerPoint;
+            $scaledH = $imgH * $pixelPerPoint;
+
+            if ($blackWhite==1)
+            {
+               $blockColor1 = '000000';
+               $blockColor2 = '404040';
+            }
+            elseif ($blackWhite==2)
+            {
+               $blockColor1 = '000000';
+               $blockColor2 = '000000';
+            }
+            else
+            {
+               $blockColor1 = '003AC3';
+               $blockColor2 = 'FF0000';
+            }
+
+            $blockColorR = round(hexdec(substr($blockColor1, 0, 2)) / 255, 5);
+            $blockColorG = round(hexdec(substr($blockColor1, 2, 2)) / 255, 5);
+            $blockColorB = round(hexdec(substr($blockColor1, 4, 2)) / 255, 5);
+            $blockColor1 = $blockColorR.' '.$blockColorG.' '.$blockColorB;
+
+            $blockColorR = round(hexdec(substr($blockColor2, 0, 2)) / 255, 5);
+            $blockColorG = round(hexdec(substr($blockColor2, 2, 2)) / 255, 5);
+            $blockColorB = round(hexdec(substr($blockColor2, 4, 2)) / 255, 5);
+            $blockColor2 = $blockColorR.' '.$blockColorG.' '.$blockColorB;
+
+            $partone = true;
+
+            date_default_timezone_set('Europe/Prague');
+
+            $output = 
+                "%!PS-Adobe EPSF-3.0\n".
+                "%%CreationDate: ".date('Y-m-d')."\n".
+                "%%Title: QR-code\n".
+                "%%Pages: 1\n".
+                "%%DocumentData: Clean7Bit\n".
+                "%%LanguageLevel: 2\n".
+                "%%BoundingBox: 0 0 $scaledW $scaledH\n".
+                "$pixelPerPoint $pixelPerPoint scale\n".
+                "$outerFrame $outerFrame translate\n".
+                "$blockColor1 setrgbcolor\n".
+                "/r {rectfill} def\n";
+
+            for($x=0; $x<$w; $x++) {
+                for($y=0; $y<$h; $y++) {
+                    if ($x + $y < $w) {
+                       if ($partone)
+                       {
+                           $partone=false;
+                           $output.="$blockColor1 setrgbcolor\n";
+                       }
+                    }
+                    else
+                    {
+                       if (!$partone)
+                       {
+                           $partone=true;
+                           $output.="$blockColor2 setrgbcolor\n";
+                       }
+                    }  
+                    if ($frame[$y][$x] == '1') {
+                        $_y = $h - 1 - $y;
+                        $output .= "$x $_y 1 1 r\n";
+                    }
+                }
+            }
+
+            $output .= '%%EOF';
+
+
+            if ($filename !== FALSE) {
+                file_put_contents($filename, $output);
+            }
+            else
+            {
+                Header("Content-type: application/postscript");
+                printf("%s\n", $output);
+            }
+
+            return $output;
+        }
+    
+        //----------------------------------------------------------------------
         public static function png($frame, $filename = false, $pixelPerPoint = 4, $outerFrame = 4,$saveandprint=FALSE, $blackWhite=0) 
         {
             $image = self::image($frame, $pixelPerPoint, $outerFrame, $blackWhite);

@@ -1,24 +1,25 @@
 <?php
 
-$postData = array(
-   'fields' => array("city","element_name"),
-   'hashes' => array("00018f0fbfac3458a04dacb330d17e8a","002b1e6195f41bf4efb3d7584c88fc56")
-);
+header('Content-Type: application/json;charset=utf-8'); 
+header("Pragma: no-cache");
+header("Expires: 0");
 
-// Create the context for the request
-$context = stream_context_create(array(
-   'http' => array(
-      // http://www.php.net/manual/en/context.http.php
-      'method' => 'POST',
-//      'header' => "Authorization: {$authToken}\r\n".
-      "Content-Type: application/json\r\n",
-      'content' => json_encode($postData)
-   )
-));
+$url = 'http://localhost:8010/elements/metadata';
 
-// Send the request
-$response = file_get_contents("http://localhost:8010/elements/metadata", FALSE, $context);
+$postData['fields'] = array("city", "element_name");
+$postData['hashes'] = array("00018f0fbfac3458a04dacb330d17e8a","002b1e6195f41bf4efb3d7584c88fc56");
 
-var_dump($response);
+$ch = curl_init();
+$headers= array('Accept: application/json','Content-Type: application/json;charset=utf-8'); 
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+$result = curl_exec($ch);
+curl_close($ch);
+
+echo $result;
 
 ?>
+
