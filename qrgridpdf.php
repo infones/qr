@@ -34,6 +34,7 @@
     blackWhite - QR color mode 0=color 1=gray 2=B&W (default=0)
     showList - print list of QR codes at the end of document (default=0)
     showName - print element name (default=0)
+    vector - print QR code as vector instead of PNG (defult=0)
 
 */
 
@@ -78,6 +79,70 @@ class MPDF extends FPDI
          ($x+$rx)*$k, ($h-$y)*$k, 
       $op));
    }
+
+   // Parse QR code in string and draw directly to PDF
+   function ImageText ($file, $x, $y, $w=0, $h=0, $blackWhite=0)
+   {
+      $data = file_get_contents($file); 
+      if ($data===false) $this->Error('TEXT file not found: '.$file); 
+      
+      if ($blackWhite==1)
+      {
+         $blockColor1R = 0x40;
+         $blockColor1G = 0x40;
+         $blockColor1B = 0x40;
+         $blockColor2R = 0x00;
+         $blockColor2G = 0x00;
+         $blockColor2B = 0x00;
+      }
+      elseif ($blackWhite==2)
+      {
+         $blockColor1R = 0x00;
+         $blockColor1G = 0x00;
+         $blockColor1B = 0x00;
+         $blockColor2R = 0x00;
+         $blockColor2G = 0x00;
+         $blockColor2B = 0x00;
+      }
+      else
+      {
+         $blockColor1R = 0x00;
+         $blockColor1G = 0x3A;
+         $blockColor1B = 0xC3;
+         $blockColor2R = 0xFF;
+         $blockColor2G = 0x00;
+         $blockColor2B = 0x00;
+      }
+
+      $row=0;
+      $col=0;
+      $width=sqrt(strlen($data));
+
+
+      for ($i=0; $i< strlen($data); $i++)
+      {
+         if ($data[$i] == "1")
+         {
+            if ($col + $row < $width - 1)
+            {
+               $this->SetFillColor($blockColor1R,$blockColor1G,$blockColor1B);
+            }
+            else   
+            {
+               $this->SetFillColor($blockColor2R,$blockColor2G,$blockColor2B);
+            }
+
+            $this->Rect($x+$w/$width*$col,$y+$h/$width*$row,$w/$width,$h/$width,"F");
+         }
+
+         if (++$col >= $width-1)
+         {
+            $row++;
+            $col=0;
+         }
+      }
+      return true;
+   }
 }
 
 $PAGE_WIDTH=297;
@@ -107,6 +172,7 @@ $showSerial=0;
 $showList=0;
 $blackWhite=0;
 $showName=0;
+$vector=0;
 
 if (isset($_REQUEST["preset"]))
    $preset=$_REQUEST["preset"];
@@ -268,6 +334,9 @@ if (isset($_REQUEST["showList"]))
 if (isset($_REQUEST["showName"]))
    $showName=$_REQUEST["showName"];
 
+if (isset($_REQUEST["vector"]))
+   $vector=$_REQUEST["vector"];
+
 
 $LOGO_BORDER_TOP=($GRID_HEIGHT-$DIAMETER)/2;          // distance between cutoff circle and grid square
 $LOGO_BORDER_LEFT=($GRID_WIDTH-$DIAMETER)/2;          // distance between cutoff circle and grid square
@@ -323,8 +392,12 @@ while ($cntr < $qrCount)      // one cycle = one page
          }
          if ($LOGO_FILE <> "")
             $pdf->useTemplate($tplIdx, $GRID_OFFSET_HORIZONTAL+$LOGO_BORDER_LEFT+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+$LOGO_BORDER_TOP); 
-         $pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
-         //$pdf->Image('http://localhost/qr/index.php?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
+         if ($vector)
+            $pdf->ImageText('http://localhost/qr/index.php?format=TEXT&filename=temp.txt&data='.$href.'&level=H',$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE, $blackWhite);
+            //$pdf->ImageText('http://qr.edocu.sk/?format=TEXT&filename=temp.txt&data='.$href.'&level=H',$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE, $blackWhite);
+         else   
+            $pdf->Image('http://localhost/qr/index.php?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
+            //$pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
          if ($drawCircle) 
          {
             $pdf->Circle($GRID_OFFSET_HORIZONTAL+($i+0.5)*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+0.5*$GRID_HEIGHT,$DIAMETER/2);
@@ -360,6 +433,6 @@ if ($showList)
 
 }
 
-$pdf->Output($OUTPUT_NAME, 'D');
+$pdf->Output($OUTPUT_NAME, 'I');
 
 ?>

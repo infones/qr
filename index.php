@@ -6,7 +6,7 @@
 //    border - in points
 //    fileName - default name of the file
 //    blackWhite - color set (0=color, 1=gray, 2=B&W)
-//    format - output format (PNG=default, EPS, TEXT, RAW)
+//    format - output format - PNG, EPS, TEXT, RAW (PNG=default)
     
     include "qrlib.php";    
 
@@ -42,12 +42,16 @@
         if (trim($_REQUEST['data']) == '')
             die('Data cannot be empty!');
             
-        // user data
+        // select output format
         if ($format=="EPS")
            QRcode::eps($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize, $blackWhite); 
-        elseif ($format="TEXT")   
-           QRcode::text($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize); 
-        elseif ($format="RAW")    
+        elseif ($format=="TEXT") 
+        {
+           $tab = QRcode::text($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize);
+           foreach ($tab as $row)
+              echo "$row";
+        }   
+        elseif ($format=="RAW")    
            QRcode::raw($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize); 
         else // default is PNG   
            QRcode::png($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize, false, $blackWhite);    

@@ -13,8 +13,8 @@ http://qr.edocu.sk/?data=http://example.com
 * size  - pixels per point (*default: 5*)
 * border - border size in points (*default: 2*)
 * fileName - PNG file name (*default: qrcode.png*) 
-* blackWhite - color schema 0=color 1=gray 2=B&W (*default=0*) 
-* format - output format PNG, EPS, TEXT, RAW (*default=PNG)
+* blackWhite - color schema 0=color 1=gray 2=B&W (*default=0*)
+* format - output format - PNG, EPS, TEXT, RAW (*default=PNG*)
 
 
 
@@ -51,6 +51,7 @@ http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes_json.php&rowCount=4&cell
 * outputName - name of output file (*default=qrgrid.pdf*)
 * preset - page layout preset (*"60_1x1", "A4_4x3" or "ch_8x5"*) 
 * showSerial - show cell serial number (*default=0*)
-* blackWhite - QR code color schema 0=color 1=gray 2=B&W (*default=0)
+* blackWhite - QR code color schema 0=color 1=gray 2=B&W (*default=0*)
 * showName - show element name (*default=0*)
+* vector - print QR code as vector instead of PNG (*defult=0*)
 

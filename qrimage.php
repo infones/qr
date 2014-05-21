@@ -125,7 +125,7 @@
             $image = self::image($frame, $pixelPerPoint, $outerFrame, $blackWhite);
             
             if ($filename === false) {
-                Header("Content-type: image/png");
+                header("Content-type: image/png");
                 ImagePng($image);
             } else {
                 if($saveandprint===TRUE){
