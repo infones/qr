@@ -344,6 +344,7 @@ $LOGO_BORDER_LEFT=($GRID_WIDTH-$DIAMETER)/2;          // distance between cutoff
 
 isset($_REQUEST["source"]) or die("source parameter missing");
 $dataSource=$_REQUEST["source"];
+$dataSource= str_replace(' ', '%20', $dataSource);
 $data = json_decode(file_get_contents($dataSource));
 $qrCount=count($data);
 
