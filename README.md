@@ -53,6 +53,8 @@ http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes_json.php&rowCount=4&cell
 * showSerial - show cell serial number (*default=0*)
 * blackWhite - QR code color schema 0=color 1=gray 2=B&W (*default=0*)
 * showName - show element name (*default=0*)
+* showType - show element type (*default=0*)
 * vector - print QR code as vector instead of PNG (*defult=0*)
 * nameLimit - limit QR name length (*default=15*)
+* typeLimit - limit QR type length (*default=15*)
 

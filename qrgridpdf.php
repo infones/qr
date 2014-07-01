@@ -34,6 +34,9 @@
     blackWhite - QR color mode 0=color 1=gray 2=B&W (default=0)
     showList - print list of QR codes at the end of document (default=0)
     showName - print element name (default=0)
+    showType - print element type (default=0)
+    nameLimit - max. number of characters of name to print (default=15)
+    nameType - max. number of characters of type to print (default=15)
     vector - print QR code as vector instead of PNG (defult=0)
 
 */
@@ -161,7 +164,6 @@ $QR_SIZE=56;                                    // size of QR
 $BACKGROUND_FILE="";                            // background grid
 $LOGO_FILE="";                                  // Logo design
 $OUTPUT_NAME="qrgrid.pdf";                      // output file default name
-$NAME_LIMIT=15;                                 // limit QR name length
 $NAME_OFFSET_VERTICAL=1;
 $NAME_OFFSET_HORIZONTAL=1;
 
@@ -173,7 +175,10 @@ $showSerial=0;
 $showList=0;
 $blackWhite=0;
 $showName=0;
+$showType=0;
 $vector=0;
+$nameLimit=15;                                 // limit QR name length
+$typeLimit=15;                                 // limit QR type length
 
 if (isset($_REQUEST["preset"]))
    $preset=$_REQUEST["preset"];
@@ -199,6 +204,7 @@ switch ($preset)
       $rowCount=1;
       $cellCount=1;
       $showName=1;
+      $showType=1;
       $showList=0;
       $showSerial=0;
       $blackWhite=2;
@@ -335,11 +341,17 @@ if (isset($_REQUEST["showList"]))
 if (isset($_REQUEST["showName"]))
    $showName=$_REQUEST["showName"];
 
+if (isset($_REQUEST["showType"]))
+   $showType=$_REQUEST["showType"];
+
 if (isset($_REQUEST["vector"]))
    $vector=$_REQUEST["vector"];
 
 if (isset($_REQUEST["nameLimit"]))
    $nameLimit=$_REQUEST["nameLimit"];
+
+if (isset($_REQUEST["typeLimit"]))
+   $typeLimit=$_REQUEST["typeLimit"];
 
 
 $LOGO_BORDER_TOP=($GRID_HEIGHT-$DIAMETER)/2;          // distance between cutoff circle and grid square
@@ -360,26 +372,66 @@ $pdf->SetAutoPageBreak(false);
 
 $cntr=0;
 
+if ($BACKGROUND_FILE <> "")
+{
+   $backgroundFileName=tempnam(sys_get_temp_dir(),"qrgrid_bck_");
+   file_put_contents($backgroundFileName, fopen("$BACKGROUND_FILE", 'r'));
+   $finfo = finfo_open(FILEINFO_MIME_TYPE);
+   $backgroundFileMime=finfo_file($finfo, $backgroundFileName);
+   if ($backgroundFileMime=="application/pdf") 
+   {
+      $pdf->setSourceFile($backgroundFileName);    
+      $tplIdxBck = $pdf->importPage(1); 
+   }
+   elseif ($backgroundFileMime=="image/png") 
+      $backgroundFileType="PNG";
+   elseif ($backgroundFileMime=="image/gif") 
+      $backgroundFileType="GIF";
+   elseif ($backgroundFileMime=="image/jpeg") 
+      $backgroundFileType="JPEG";
+}
+
+if ($LOGO_FILE <> "")
+{
+   $logoFileName=tempnam(sys_get_temp_dir(),"qrgrid_logo_");
+   file_put_contents($logoFileName, fopen("$LOGO_FILE", 'r'));
+   $finfo = finfo_open(FILEINFO_MIME_TYPE);
+   $logoFileMime=finfo_file($finfo, $logoFileName);
+   if ($logoFileMime=="application/pdf") 
+   {
+      $pdf->setSourceFile($logoFileName);    
+      $tplIdxLogo = $pdf->importPage(1); 
+   }
+   elseif ($logoFileMime=="image/png") 
+      $logoFileType="PNG";
+   elseif ($logoFileMime=="image/gif") 
+      $logoFileType="GIF";
+   elseif ($logoFileMime=="image/jpeg") 
+      $logoFileType="JPEG";
+}
+
 while ($cntr < $qrCount)      // one cycle = one page
 {
    $pdf->AddPage(); 
    if ($BACKGROUND_FILE <> "")
    {
-      $pdf->setSourceFile($BACKGROUND_FILE);    
-      $tplIdx = $pdf->importPage(1); 
-      $pdf->useTemplate($tplIdx, 0, 0, 0, 0, true); 
-   }
-
-   if ($LOGO_FILE <> "")
-   {
-      $pdf->setSourceFile($LOGO_FILE);        
-      $tplIdx = $pdf->importPage(1); 
+      if ($backgroundFileMime=="application/pdf") 
+         $pdf->useTemplate($tplIdxBck, 0, 0, 0, 0, true);
+      else
+         $pdf->Image($backgroundFileName,0,0,0,0,$backgroundFileType);
    }
 
    for ($r=0; $r<$rowCount && $cntr < $qrCount; $r++)         // rows
    {
       for ($i=0; $i < $cellCount && $cntr < $qrCount; $i++)    // grid cells 
       {
+         if ($LOGO_FILE <> "")
+         {
+            if ($logoFileMime=="application/pdf") 
+               $pdf->useTemplate($tplIdxLogo, $GRID_OFFSET_HORIZONTAL+$LOGO_BORDER_LEFT+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+$LOGO_BORDER_TOP);
+            else
+               $pdf->Image($logoFileName,$GRID_OFFSET_HORIZONTAL+$LOGO_BORDER_LEFT+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+$LOGO_BORDER_TOP,0,0,$logoFileType);
+         }
          $href=urlencode($data[$cntr]->href);
          if ($showSerial) 
          {
@@ -395,9 +447,15 @@ while ($cntr < $qrCount)      // one cycle = one page
             $pdf->SetX($GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH);
             $pdf->Cell($GRID_WIDTH,5,$name,0,0,'C', false);
          }
-         if ($LOGO_FILE <> "")
-            $pdf->useTemplate($tplIdx, $GRID_OFFSET_HORIZONTAL+$LOGO_BORDER_LEFT+$i*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+$LOGO_BORDER_TOP); 
-         if ($vector)
+         if ($showType) 
+         {
+            $type=substr(iconv('UTF-8', 'ISO-8859-2',$data[$cntr]->type),0,$typeLimit);
+            $pdf->SetFont('arial','',8);
+            $pdf->SetY($GRID_OFFSET_VERTICAL+3+($r+1)*$BAND_HEIGHT);
+            $pdf->SetX($GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH);
+            $pdf->Cell($GRID_WIDTH,5,$type,0,0,'C', false);
+         }
+        if ($vector)
             //$pdf->ImageText('http://localhost/qr/index.php?format=TEXT&filename=temp.txt&data='.$href.'&level=H',$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE, $blackWhite);
             $pdf->ImageText('http://qr.edocu.sk/?format=TEXT&filename=temp.txt&data='.$href.'&level=H',$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE, $blackWhite);
          else   
@@ -412,6 +470,15 @@ while ($cntr < $qrCount)      // one cycle = one page
    }
 }
 
+if ($BACKGROUND_FILE <> "")
+{
+   unlink($backgroundFileName);
+}
+
+if ($LOGO_FILE <> "")
+{
+   unlink($logoFileName);
+}
 
 // print list of QR codes at the end of document
 if ($showList)
