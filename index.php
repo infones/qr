@@ -16,8 +16,8 @@
 
     $fileName="qrcode.png";
     if (isset($_REQUEST["fileName"]))
-      $fileName=$_REQUEST["fileName"];
-      //$fileName=str_replace('.','_',$_REQUEST["fileName"]);
+      //$fileName=$_REQUEST["fileName"];
+      $fileName=str_replace(".","_",$_REQUEST["fileName"]);
 
     $blackWhite=0;
     if (isset($_REQUEST["blackWhite"]))
