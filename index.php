@@ -10,16 +10,19 @@
     
     include "qrlib.php";    
 
+    $format= "PNG";
+    if (isset($_REQUEST['format']))
+        $format= strtoupper($_REQUEST['format']);
+
     $fileName="qrcode.png";
     if (isset($_REQUEST["fileName"]))
       $fileName=$_REQUEST["fileName"];
+      //$fileName=str_replace('.','_',$_REQUEST["fileName"]);
 
     $blackWhite=0;
     if (isset($_REQUEST["blackWhite"]))
       $blackWhite=$_REQUEST["blackWhite"];
 
-    header ("Content-Disposition: inline; filename=".$fileName);
-    
     $borderSize= 2;
     if (isset($_REQUEST['border']))
         $borderSize= $_REQUEST['border'];    
@@ -32,21 +35,24 @@
     if (isset($_REQUEST['size']))
         $matrixPointSize = min(max((int)$_REQUEST['size'], 1), 10);
 
-    $format= "PNG";
-    if (isset($_REQUEST['format']))
-        $format= strtoupper($_REQUEST['format']);
 
     if (isset($_REQUEST['data'])) { 
     
+        header ("Content-Disposition: inline; filename=".$fileName);
+
         //it's very important!
         if (trim($_REQUEST['data']) == '')
             die('Data cannot be empty!');
             
         // select output format
         if ($format=="EPS")
+        {
+           header("Content-type: application/eps");
            QRcode::eps($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize, $blackWhite); 
+        }  
         elseif ($format=="TEXT") 
         {
+           header("Content-type: text/plain");
            $tab = QRcode::text($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize);
            foreach ($tab as $row)
               echo "$row";
@@ -54,8 +60,10 @@
         elseif ($format=="RAW")    
            QRcode::raw($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize); 
         else // default is PNG   
+        { 
+           header("Content-type: image/png");
            QRcode::png($_REQUEST['data'], false ,$errorCorrectionLevel, $matrixPointSize, $borderSize, false, $blackWhite);    
-        
+         }
     } 
     else 
     {    
