@@ -38,6 +38,7 @@
     nameLimit - max. number of characters of name to print (default=15)
     nameType - max. number of characters of type to print (default=15)
     vector - print QR code as vector instead of PNG (defult=0)
+    level - error correction level ("L"ow,"M"edium,"Q"uarter,"H"igh, default=H)
 
 */
 
@@ -179,6 +180,7 @@ $showType=0;
 $vector=0;
 $nameLimit=15;                                 // limit QR name length
 $typeLimit=15;                                 // limit QR type length
+$level="H";
 
 if (isset($_REQUEST["preset"]))
    $preset=$_REQUEST["preset"];
@@ -353,6 +355,9 @@ if (isset($_REQUEST["nameLimit"]))
 if (isset($_REQUEST["typeLimit"]))
    $typeLimit=$_REQUEST["typeLimit"];
 
+if (isset($_REQUEST["level"]))
+   $level=$_REQUEST["level"];
+
 
 $LOGO_BORDER_TOP=($GRID_HEIGHT-$DIAMETER)/2;          // distance between cutoff circle and grid square
 $LOGO_BORDER_LEFT=($GRID_WIDTH-$DIAMETER)/2;          // distance between cutoff circle and grid square
@@ -457,10 +462,10 @@ while ($cntr < $qrCount)      // one cycle = one page
          }
         if ($vector)
             //$pdf->ImageText('http://localhost/qr/index.php?format=TEXT&filename=temp.txt&data='.$href.'&level=H',$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE, $blackWhite);
-            $pdf->ImageText('http://qr.edocu.sk/?format=TEXT&filename=temp.txt&data='.$href.'&level=H',$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE, $blackWhite);
+            $pdf->ImageText('http://qr.edocu.sk/?format=TEXT&filename=temp.txt&data='.$href.'&level='.$level,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE, $blackWhite);
          else   
             //$pdf->Image('http://localhost/qr/index.php?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
-            $pdf->Image('http://qr.edocu.sk/?data='.$href.'&level=H&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
+            $pdf->Image('http://qr.edocu.sk/?data='.$href.'&level='.$level.'&size=10&border=0&blackWhite='.$blackWhite,$QR_OFFSET_HORIZONTAL+$GRID_OFFSET_HORIZONTAL+$i*$GRID_WIDTH,$QR_OFFSET_VERTICAL+$GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT,$QR_SIZE,$QR_SIZE,'PNG');
          if ($drawCircle) 
          {
             $pdf->Circle($GRID_OFFSET_HORIZONTAL+($i+0.5)*$GRID_WIDTH, $GRID_OFFSET_VERTICAL+$r*$BAND_HEIGHT+0.5*$GRID_HEIGHT,$DIAMETER/2);

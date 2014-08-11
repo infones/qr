@@ -57,4 +57,5 @@ http://qr.edocu.sk/qrgridpdf.php?source=list_of_qrcodes_json.php&rowCount=4&cell
 * vector - print QR code as vector instead of PNG (*defult=0*)
 * nameLimit - limit QR name length (*default=15*)
 * typeLimit - limit QR type length (*default=15*)
+* level - error correction level ("L"ow,"M"edium,"Q"uarter,"H"igh, default=H) 
 
