@@ -38,7 +38,7 @@
 
     if (isset($_REQUEST['data'])) { 
     
-        header ("Content-Disposition: inline; filename=".$fileName);
+        header (sprintf('Content-Disposition: inline; filename="%1$s"; filename*=UTF-8\'\'%1$s', rawurldecode($fileName)));
 
         //it's very important!
         if (trim($_REQUEST['data']) == '')
