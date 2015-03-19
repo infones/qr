@@ -37,8 +37,8 @@
 
 
     if (isset($_REQUEST['data'])) { 
-    
-        header (sprintf('Content-Disposition: inline; filename="%1$s"; filename*=UTF-8\'\'%1$s', rawurldecode($fileName)));
+        // filename in Content-Dispositon header must be encode in ASCII (ISO-8859-1) for filename and for filename* in url encoded format
+        header (sprintf('Content-Disposition: inline; filename="%s";filename*=UTF-8\'\'%s', iconv("UTF-8", "ISO-8859-1//TRANSLIT", $fileName), rawurlencode($fileName)));
 
         //it's very important!
         if (trim($_REQUEST['data']) == '')
